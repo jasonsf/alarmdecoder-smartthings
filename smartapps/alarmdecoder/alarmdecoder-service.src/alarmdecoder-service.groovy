@@ -361,13 +361,20 @@ private def configureDevices() {
     subscribe(device, "zone-off", zoneOff, [filterEvents: false])
     subscribe(device, "alarmStatus", alarmdecoderAlarmHandler, [filterEvents: false])
 
+					/*** Sensors ***/
+				def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
+				def sensorKeys = sensorMap.keySet() as String[]; 
+
     // Add virtual zone contact sensors.
-    for (def i = 0; i < 8; i++)
+    for (def i = 0; i < sensorMap.size(); i++)
     {
+		def currentSensorKey = sensorKeys[i];	
+    	def currentSensorValue = sensorMap[currentSensorKey];									  
+
         def newSwitch = state.devices.find { k, v -> k == "${state.ip}:${state.port}:switch${i+1}" }
         if (!newSwitch)
         {
-            def zone_switch = addChildDevice("alarmdecoder", "virtual contact sensor", "${state.ip}:${state.port}:switch${i+1}", state.hub, [name: "${state.ip}:${state.port}:switch${i+1}", label: "AlarmDecoder Zone Sensor #${i+1}", completedSetup: true])
+            def zone_switch = addChildDevice("alarmdecoder", "virtual contact sensor", "${state.ip}:${state.port}:switch${i+1}", state.hub, [name: "${state.ip}:${state.port}:switch${i+1}", label: "${currentSensorKey}: ${currentSensorValue}", completedSetup: true])
 
             def sensorValue = "open"
             if (settings.defaultSensorToClosed == true)
