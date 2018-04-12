@@ -15,13 +15,6 @@
  */
 import groovy.json.JsonSlurper;
 
-/*** Sensors ***/
-
-def getSensorMap() {
-    return ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
-}
-
-def sensorMap = getSensorMap();				 
 preferences {
     section() {
         input("api_key", "password", title: "API Key", description: "The key to access the REST API", required: true)
@@ -29,23 +22,15 @@ preferences {
         input("panel_type", "enum", title: "Panel Type", description: "Type of panel", options: ["ADEMCO", "DSC"], defaultValue: "ADEMCO", required: true)
     }
     section() {
-        input("zonetracker1zone", "number", title: "10: " + sensorMap['10'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker2zone", "number", title: "11: " + sensorMap['11'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker3zone", "number", title: "12: " + sensorMap['12'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker4zone", "number", title: "13: " + sensorMap['13'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker5zone", "number", title: "14: " + sensorMap['14'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker6zone", "number", title: "15: " + sensorMap['15'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker7zone", "number", title: "16: " + sensorMap['16'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker8zone", "number", title: "17: " + sensorMap['17'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker9zone", "number", title: "18: " + sensorMap['18'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker10zone", "number", title: "19: " + sensorMap['19'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker11zone", "number", title: "20: " + sensorMap['20'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker12zone", "number", title: "21: " + sensorMap['21'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker13zone", "number", title: "22: " + sensorMap['22'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker14zone", "number", title: "23: " + sensorMap['23'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker15zone", "number", title: "24: " + sensorMap['24'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker16zone", "number", title: "25: " + sensorMap['25'], description: "Zone number to associate with this contact sensor.")
-   }
+        input("zonetracker1zone", "number", title: "ZoneTracker Sensor #1", description: "Zone number to associate with this contact sensor.")
+        input("zonetracker2zone", "number", title: "ZoneTracker Sensor #2", description: "Zone number to associate with this contact sensor.")
+        input("zonetracker3zone", "number", title: "ZoneTracker Sensor #3", description: "Zone number to associate with this contact sensor.")
+        input("zonetracker4zone", "number", title: "ZoneTracker Sensor #4", description: "Zone number to associate with this contact sensor.")
+        input("zonetracker5zone", "number", title: "ZoneTracker Sensor #5", description: "Zone number to associate with this contact sensor.")
+        input("zonetracker6zone", "number", title: "ZoneTracker Sensor #6", description: "Zone number to associate with this contact sensor.")
+        input("zonetracker7zone", "number", title: "ZoneTracker Sensor #7", description: "Zone number to associate with this contact sensor.")
+        input("zonetracker8zone", "number", title: "ZoneTracker Sensor #8", description: "Zone number to associate with this contact sensor.")
+    }
 }
 
 metadata {
@@ -71,10 +56,6 @@ metadata {
         attribute "zoneStatus10", "number"
         attribute "zoneStatus11", "number"
         attribute "zoneStatus12", "number"
-        attribute "zoneStatus13", "number"
-        attribute "zoneStatus14", "number"
-        attribute "zoneStatus15", "number"
-        attribute "zoneStatus16", "number"										  
 
         command "disarm"
         command "arm_stay"
@@ -215,51 +196,19 @@ metadata {
             ]
         }
 
-        valueTile("zoneStatus13", "device.zoneStatus13", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
-                [value: 0, color: "#ffffff"],
-                [value: 1, color: "#ff0000"],
-                [value: 99, color: "#ff0000"]
-            ]
-        }
-
-        valueTile("zoneStatus14", "device.zoneStatus14", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
-                [value: 0, color: "#ffffff"],
-                [value: 1, color: "#ff0000"],
-                [value: 99, color: "#ff0000"]
-            ]
-        }
-
-        valueTile("zoneStatus15", "device.zoneStatus15", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
-                [value: 0, color: "#ffffff"],
-                [value: 1, color: "#ff0000"],
-                [value: 99, color: "#ff0000"]
-            ]
-        }
-        
-        valueTile("zoneStatus16", "device.zoneStatus16", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
-                [value: 0, color: "#ffffff"],
-                [value: 1, color: "#ff0000"],
-                [value: 99, color: "#ff0000"]
-            ]
-        }
-		
         standardTile("refresh", "device.refresh", inactiveLabel: false, decoration: "flat", width: 6, height: 2) {
             state "default", action:"refresh.refresh", icon:"st.secondary.refresh"
         }
 
         main(["status"])
-        details(["status", "arm_disarm", "stay_disarm", "panic", "zoneStatus1", "zoneStatus2", "zoneStatus3", "zoneStatus4", "zoneStatus5", "zoneStatus6", "zoneStatus7", "zoneStatus8", "zoneStatus9", "zoneStatus10", "zoneStatus11", "zoneStatus12", "zoneStatus13", "zoneStatus14", "zoneStatus15", "zoneStatus16", "refresh", "teststuff"])
+        details(["status", "arm_disarm", "stay_disarm", "panic", "zoneStatus1", "zoneStatus2", "zoneStatus3", "zoneStatus4", "zoneStatus5", "zoneStatus6", "zoneStatus7", "zoneStatus8", "zoneStatus9", "zoneStatus10", "zoneStatus11", "zoneStatus12", "refresh", "teststuff"])
     }
 }
 
 /*** Handlers ***/
 
 def installed() {
-    for (def i = 1; i <= sensorMap.size(); i++)
+    for (def i = 1; i <= 12; i++)
         sendEvent(name: "zoneStatus${i}", value: "", displayed: false)
 }
 
@@ -273,7 +222,7 @@ def updated() {
     state.armed = false
     state.panic_started = null;
 
-    for (def i = 1; i <= sensorMap.size(); i++)
+    for (def i = 1; i <= 12; i++)
         sendEvent(name: "zoneStatus${i}", value: "", displayed: false)
 }
 
@@ -545,8 +494,7 @@ private def build_zone_events(data) {
     //log.trace("Filling zone tiles..")
 
     // Fill zone tiles
-	def sensorMap = getSensorMap();							
-    for (def i = 1; i <= sensorMap.size(); i++) {
+    for (def i = 1; i <= 12; i++) {
         if (number_of_zones_faulted > 0 && i <= number_of_zones_faulted) {
             if (device.currentValue("zoneStatus${i}") != current_faults[i-1])
                 events << createEvent(name: "zoneStatus${i}", value: current_faults[i-1], displayed: false)
@@ -567,11 +515,11 @@ private def build_zone_events(data) {
 
 private def update_zone_switches(zone, faulted) {
     def events = []
-    def sensorMap = getSensorMap();
+
     // Iterate through the zone tracker settings.  If the zone number matches,
     // trigger an event for the service manager to use to flip the virtual
     // switches.
-    for (def i = 1; i <= sensorMap.size(); i++) {
+    for (def i = 1; i <= 8; i++) {
         if (zone == settings."zonetracker${i}zone") {
             if (faulted)
                 events << createEvent(name: "zone-on", value: i, isStateChange: true, displayed: false)
