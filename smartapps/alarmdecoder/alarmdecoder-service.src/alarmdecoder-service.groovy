@@ -570,6 +570,9 @@ def addExistingDevices() {
             // Add virtual zone contact sensors if they do not exist.
             for (def i = 0; i < sensorMap.size(); i++)
             {
+				def currentSensorKey = sensorKeys[i];	
+				def currentSensorValue = sensorMap[currentSensorKey];		
+				
                 def newSwitch = state.devices.find { k, v -> k == "${state.ip}:${state.port}:switch${i+1}" }
                 if (!newSwitch)
                 {
