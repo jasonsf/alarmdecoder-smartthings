@@ -430,10 +430,8 @@ def discover_alarmdecoder() {
  * create cron schedule and call back handlers
  */
 def scheduleRefresh() {
-    def minutes = 5
-
-    def cron = "0 0/${minutes} * * * ?"
-    schedule(cron, refreshHandler)
+    log.trace "scheduleRefresh"
+    runEvery5Minutes(refreshHandler)
 }
 
 /**
