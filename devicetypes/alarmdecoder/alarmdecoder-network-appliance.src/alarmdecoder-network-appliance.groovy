@@ -64,9 +64,16 @@ metadata {
         command "arm_stay"
         command "arm_away"
         command "fire"
+        command "fire1"
+        command "fire2"
         command "panic"
+        command "panic1"
+        command "panic2"        
         command "aux"
+        command "aux1"
+        command "aux2"
         command "chime"
+        command "bypass", ["number"]
         command "bypass1"
         command "bypass2"
         command "bypass3"
@@ -98,7 +105,7 @@ metadata {
             }
         }
 
-        standardTile("arm_disarm", "device.panel_state", inactiveLabel: false, width: 1, height: 1) {
+        standardTile("arm_disarm", "device.panel_state", inactiveLabel: false, width: 2, height: 2) {
             state "armed", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
             state "armed_stay", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
             state "disarmed", action:"arm_away", icon:"st.security.alarm.on", label: "AWAY"
@@ -108,7 +115,7 @@ metadata {
             state "notready", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
         }
 
-        standardTile("stay_disarm", "device.panel_state", inactiveLabel: false, width: 1, height: 1) {
+        standardTile("stay_disarm", "device.panel_state", inactiveLabel: false, width: 2, height: 2) {
             state "armed", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
             state "armed_stay", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
             state "disarmed", action:"arm_stay", icon:"st.Home.home4", label: "STAY"
@@ -118,19 +125,19 @@ metadata {
             state "notready", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
         }
 
-        standardTile("panic", "device.panic_state", inactiveLabel: false, width: 2, height: 2) {
+        standardTile("panic", "device.panic_state", inactiveLabel: false, width: 1, height: 1) {
             state "default", icon:"http://www.alarmdecoder.com/st/ad2-police.png", label: "PANIC", nextState: "panic1", action: "panic1"
             state "panic1", icon: "http://www.alarmdecoder.com/st/ad2-police.png", label: "PANIC", nextState: "panic2", action: "panic2", backgroundColor: "#ffa81e"
             state "panic2", icon: "http://www.alarmdecoder.com/st/ad2-police.png", label: "PANIC", nextState: "default", action: "panic", backgroundColor: "#ff4000"
         }
 
-        standardTile("fire", "device.fire_state", inactiveLabel: false, width: 2, height: 2) {
+        standardTile("fire", "device.fire_state", inactiveLabel: false, width: 1, height: 1) {
             state "default", icon:"http://www.alarmdecoder.com/st/ad2-fire.png", label: "FIRE", nextState: "fire1", action: "fire1"
             state "fire1", icon: "http://www.alarmdecoder.com/st/ad2-fire.png", label: "FIRE", nextState: "fire2", action: "fire2", backgroundColor: "#ffa81e"
             state "fire2", icon: "http://www.alarmdecoder.com/st/ad2-fire.png", label: "FIRE", nextState: "default", action: "fire", backgroundColor: "#ff4000"
         }
 
-        standardTile("aux", "device.aux_state", inactiveLabel: false, width: 2, height: 2) {
+        standardTile("aux", "device.aux_state", inactiveLabel: false, width: 1, height: 1) {
             state "default", icon:"http://www.alarmdecoder.com/st/ad2-aux.png", label: "AUX", nextState: "aux1", action: "aux1"
             state "aux1", icon: "http://www.alarmdecoder.com/st/ad2-aux.png", label: "AUX", nextState: "aux2", action: "aux2", backgroundColor: "#ffa81e"
             state "aux2", icon: "http://www.alarmdecoder.com/st/ad2-aux.png", label: "AUX", nextState: "default", action: "aux", backgroundColor: "#ff4000"
@@ -313,10 +320,14 @@ def parse_json(String headers, String body) {
 // Parse XML and new state. Build UI and return UI update events
 def parse_xml(String headers, String body) {
     log.trace("--- parse_xml")
-
+    if (debug) log.debug(body)
     def xmlResult = new XmlSlurper().parseText(body)
 
     def resultMap = [:]
+    resultMap['eventid'] = xmlResult.property.eventid.toInteger()
+    resultMap['eventdesc'] = xmlResult.property.eventdesc.text()
+    resultMap['eventmessage'] = xmlResult.property.eventmessage.text()
+    resultMap['rawmessage'] = xmlResult.property.rawmessage.text()    
     resultMap['last_message_received'] = xmlResult.property.panelstate.last_message_received.text()
     resultMap['panel_alarming'] = xmlResult.property.panelstate.panel_alarming.toBoolean()
     resultMap['panel_armed'] = xmlResult.property.panelstate.panel_armed.toBoolean()
@@ -615,13 +626,18 @@ def bypass12() {
     bypassN(10)
 }
 
-def bypassN(value) {
-    def zone = device.currentValue("zoneStatus${value}")
+def bypassN(szValue) {
+    def zone = device.currentValue("zoneStatus${szValue}")
+    bypass(zone)
+}
+
+def bypass(zone) {
+   log.trace("--- bypass ${zone}")
+   
     // if no zone then skip
     if(!zone.toInteger())
       return;
 
-    log.trace("--- bypass1 ${zone}")
     def user_code = _get_user_code()
     def keys = ""
 
@@ -630,7 +646,7 @@ def bypassN(value) {
     else if (settings.panel_type == "DSC")
         keys = "*1" + zone.padLeft(2,"0")
     else
-        log.warn("--- bypass1: unknown panel_type.")
+        log.warn("--- bypass: unknown panel_type.")
 
     return send_keys(keys)
 }
@@ -681,6 +697,11 @@ def update_state(data) {
     // Update our ready indicator virtual device
     if (forceguiUpdate || data.panel_ready != state.panel_ready)
         events << createEvent(name: "ready-set", value: data.panel_ready ? "close" : "open", displayed: true, isStateChange: true)
+
+    // Event Type 14 CID send raw data upstream if we find one
+    if (data.eventid == 14) {
+        events << createEvent(name: "cid-set", value: data.rawmessage, displayed: true, isStateChange: true)        
+    }
 
     if (armed) {
         panel_state = (data.panel_armed_stay ? "armed_stay" : "armed")
