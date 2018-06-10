@@ -16,20 +16,15 @@
 metadata {
     definition (name: "AlarmDecoder virtual contact sensor", namespace: "alarmdecoder", author: "scott@nutech.com") {
         capability "Contact Sensor"
-        capability "Refresh"
     }
 
     // tile definitions
     tiles {
         standardTile("sensor", "device.contact", width: 2, height: 2, canChangeIcon: true) {
-            state "closed", label: '${name}', icon: "st.contact.contact.closed", backgroundColor: "#79b821"
-            state "open", label: '${name}', icon: "st.contact.contact.open", backgroundColor: "#ffffff"
+            state "closed", label: '${name}', icon: "st.contact.contact.closed", backgroundColor: "#00a0dc"
+            state "open", label: '${name}', icon: "st.contact.contact.open", backgroundColor: "#e86d13"
         }
-        standardTile("refresh", "device.refresh", inactiveLabel: false, decoration: "flat") {
-            state "default", label:'Refresh', action:"device.refresh", icon: "st.secondary.refresh-icon"
-        }
-
         main "sensor"
-        details(["sensor", "refresh"])
+        details "sensor"
     }
 }

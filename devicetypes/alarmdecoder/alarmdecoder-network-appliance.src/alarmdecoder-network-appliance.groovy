@@ -56,10 +56,6 @@ preferences {
 metadata {
     definition (name: "AlarmDecoder network appliance", namespace: "alarmdecoder", author: "Scott Petersen") {
         capability "Refresh"
-        capability "Switch"             // STAY
-        capability "Lock"               // AWAY
-        capability "Alarm"              // PANIC
-        capability "Contact Sensor"     // ALARM -> Smart Home Monitor
 
         attribute "panel_state", "enum", ["armed", "armed_stay", "disarmed", "alarming", "fire", "ready", "notready"]
         attribute "armed", "enum", ["armed", "disarmed"]
@@ -89,10 +85,24 @@ metadata {
         command "fire2"
         command "panic"
         command "panic1"
-        command "panic2"
+        command "panic2"        
         command "aux"
         command "aux1"
         command "aux2"
+        command "chime"
+        command "bypass", ["number"]
+        command "bypass1"
+        command "bypass2"
+        command "bypass3"
+        command "bypass4"
+        command "bypass5"
+        command "bypass6"
+        command "bypass7"
+        command "bypass8"
+        command "bypass9"
+        command "bypass10"
+        command "bypass11"
+        command "bypass12"        
     }
 
     simulator {
@@ -112,46 +122,46 @@ metadata {
             }
         }
 
-        standardTile("arm_disarm", "device.panel_state", inactiveLabel: false, width: 1, height: 1) {
-            state "armed", action:"lock.unlock", icon:"st.security.alarm.off", label: "DISARM"
-            state "armed_stay", action:"lock.unlock", icon:"st.security.alarm.off", label: "DISARM"
-            state "disarmed", action:"lock.lock", icon:"st.security.alarm.on", label: "AWAY"
-            state "alarming", action:"lock.unlock", icon:"st.security.alarm.off", label: "DISARM"
-            state "fire", action:"lock.unlock", icon:"st.security.alarm.off", label: "DISARM"
-            state "ready", action:"lock.lock", icon:"st.security.alarm.off", label: "AWAY"
-            state "notready", action:"lock.unlock", icon:"st.security.alarm.off", label: "DISARM"
+        standardTile("arm_disarm", "device.panel_state", inactiveLabel: false, width: 2, height: 2) {
+            state "armed", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
+            state "armed_stay", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
+            state "disarmed", action:"arm_away", icon:"st.security.alarm.on", label: "AWAY"
+            state "alarming", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
+            state "fire", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
+            state "ready", action:"arm_away", icon:"st.security.alarm.off", label: "AWAY"
+            state "notready", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
         }
 
-        standardTile("stay_disarm", "device.panel_state", inactiveLabel: false, width: 1, height: 1) {
-            state "armed", action:"switch.off", icon:"st.security.alarm.off", label: "DISARM"
-            state "armed_stay", action:"switch.off", icon:"st.security.alarm.off", label: "DISARM"
-            state "disarmed", action:"switch.on", icon:"st.Home.home4", label: "STAY"
-            state "alarming", action:"switch.off", icon:"st.security.alarm.off", label: "DISARM"
-            state "fire", action:"switch.off", icon:"st.security.alarm.off", label: "DISARM"
-            state "ready", action:"switch.on", icon:"st.security.alarm.off", label: "STAY"
-            state "notready", action:"switch.off", icon:"st.security.alarm.off", label: "DISARM"
+        standardTile("stay_disarm", "device.panel_state", inactiveLabel: false, width: 2, height: 2) {
+            state "armed", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
+            state "armed_stay", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
+            state "disarmed", action:"arm_stay", icon:"st.Home.home4", label: "STAY"
+            state "alarming", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
+            state "fire", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
+            state "ready", action:"arm_stay", icon:"st.security.alarm.off", label: "STAY"
+            state "notready", action:"disarm", icon:"st.security.alarm.off", label: "DISARM"
         }
 
-        standardTile("panic", "device.panic_state", inactiveLabel: false, width: 2, height: 2) {
+        standardTile("panic", "device.panic_state", inactiveLabel: false, width: 1, height: 1) {
             state "default", icon:"http://www.alarmdecoder.com/st/ad2-police.png", label: "PANIC", nextState: "panic1", action: "panic1"
             state "panic1", icon: "http://www.alarmdecoder.com/st/ad2-police.png", label: "PANIC", nextState: "panic2", action: "panic2", backgroundColor: "#ffa81e"
             state "panic2", icon: "http://www.alarmdecoder.com/st/ad2-police.png", label: "PANIC", nextState: "default", action: "panic", backgroundColor: "#ff4000"
         }
 
-        standardTile("fire", "device.fire_state", inactiveLabel: false, width: 2, height: 2) {
+        standardTile("fire", "device.fire_state", inactiveLabel: false, width: 1, height: 1) {
             state "default", icon:"http://www.alarmdecoder.com/st/ad2-fire.png", label: "FIRE", nextState: "fire1", action: "fire1"
             state "fire1", icon: "http://www.alarmdecoder.com/st/ad2-fire.png", label: "FIRE", nextState: "fire2", action: "fire2", backgroundColor: "#ffa81e"
             state "fire2", icon: "http://www.alarmdecoder.com/st/ad2-fire.png", label: "FIRE", nextState: "default", action: "fire", backgroundColor: "#ff4000"
         }
 
-        standardTile("aux", "device.aux_state", inactiveLabel: false, width: 2, height: 2) {
+        standardTile("aux", "device.aux_state", inactiveLabel: false, width: 1, height: 1) {
             state "default", icon:"http://www.alarmdecoder.com/st/ad2-aux.png", label: "AUX", nextState: "aux1", action: "aux1"
             state "aux1", icon: "http://www.alarmdecoder.com/st/ad2-aux.png", label: "AUX", nextState: "aux2", action: "aux2", backgroundColor: "#ffa81e"
             state "aux2", icon: "http://www.alarmdecoder.com/st/ad2-aux.png", label: "AUX", nextState: "default", action: "aux", backgroundColor: "#ff4000"
         }
 
         valueTile("zoneStatus1", "device.zoneStatus1", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass1", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -159,7 +169,7 @@ metadata {
         }
 
         valueTile("zoneStatus2", "device.zoneStatus2", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass2", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -167,7 +177,7 @@ metadata {
         }
 
         valueTile("zoneStatus3", "device.zoneStatus3", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass3", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -175,7 +185,7 @@ metadata {
         }
 
         valueTile("zoneStatus4", "device.zoneStatus4", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass4", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -183,7 +193,7 @@ metadata {
         }
 
         valueTile("zoneStatus5", "device.zoneStatus5", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass5", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -191,7 +201,7 @@ metadata {
         }
 
         valueTile("zoneStatus6", "device.zoneStatus6", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass6", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -199,7 +209,7 @@ metadata {
         }
 
         valueTile("zoneStatus7", "device.zoneStatus7", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass7", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -207,7 +217,7 @@ metadata {
         }
 
         valueTile("zoneStatus8", "device.zoneStatus8", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass8", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -215,7 +225,7 @@ metadata {
         }
 
         valueTile("zoneStatus9", "device.zoneStatus9", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass9", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -223,7 +233,7 @@ metadata {
         }
 
         valueTile("zoneStatus10", "device.zoneStatus10", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass10", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -231,7 +241,7 @@ metadata {
         }
 
         valueTile("zoneStatus11", "device.zoneStatus11", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass11", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -239,7 +249,7 @@ metadata {
         }
 
         valueTile("zoneStatus12", "device.zoneStatus12", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass12", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -247,7 +257,7 @@ metadata {
         }
 
 		valueTile("zoneStatus13", "device.zoneStatus13", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass13", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -255,7 +265,7 @@ metadata {
         }
 
         valueTile("zoneStatus14", "device.zoneStatus14", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass14", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -263,7 +273,7 @@ metadata {
         }
 
         valueTile("zoneStatus15", "device.zoneStatus15", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass15", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -271,7 +281,7 @@ metadata {
         }
         
         valueTile("zoneStatus16", "device.zoneStatus16", inactiveLabel: false, width: 1, height: 1) {
-            state "default", icon:"", label: '${currentValue}', backgroundColors: [
+            state "default", icon:"", label: '${currentValue}', action: "bypass16", nextState: "default", backgroundColors: [
                 [value: 0, color: "#ffffff"],
                 [value: 1, color: "#ff0000"],
                 [value: 99, color: "#ff0000"]
@@ -282,12 +292,14 @@ metadata {
         }
 
         main(["status"])
-        details(["status", "arm_disarm", "stay_disarm", "panic", "fire", "aux", "zoneStatus1", "zoneStatus2", "zoneStatus3", "zoneStatus4", "zoneStatus5", "zoneStatus6", "zoneStatus7", "zoneStatus8", "zoneStatus9", "zoneStatus10", "zoneStatus11", "zoneStatus12", "zoneStatus13", "zoneStatus14", "zoneStatus15", "zoneStatus16", "refresh", "teststuff"])
+        details(["status", "arm_disarm", "stay_disarm", "panic", "fire", "aux", "zoneStatus1", "zoneStatus2", "zoneStatus3", "zoneStatus4", "zoneStatus5", "zoneStatus6", "zoneStatus7", "zoneStatus8", "zoneStatus9", "zoneStatus10", "zoneStatus11", "zoneStatus12", "refresh"])
     }
 }
 
 /*** Handlers ***/
-
+/*** Sensors ***/
+			def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
+			def sensorKeys = sensorMap.keySet() as String[]; 
 def installed() {
     for (def i = 1; i <= sensorMap.size(); i++)
         sendEvent(name: "zoneStatus${i}", value: "", displayed: false)
@@ -307,6 +319,7 @@ def updated() {
     state.panel_panicked = false
     state.panel_on_battery = true
     state.panel_powered = true
+    state.panel_chime = true
 
     // Calculated alarm state ENUM
     state.panel_state = "disarmed"
@@ -318,11 +331,18 @@ def updated() {
     state.fire_started = null;
     state.aux_started = null;
 
+/*** Sensors ***/
+			def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
+			def sensorKeys = sensorMap.keySet() as String[]; 
     for (def i = 1; i <= sensorMap.size(); i++)
         sendEvent(name: "zoneStatus${i}", value: "", displayed: false)
 
     // subscribe if settings change
+    unschedule()
+    // subscribe right now
     subscribeNotifications()
+    // resub every 5min
+    runEvery5Minutes(subscribeNotifications)
 }
 
 def uninstalled() {
@@ -332,6 +352,7 @@ def uninstalled() {
 // Subscribe to the AlarmDecoder upnp event notification
 // FIXME: Need to get this from the eventSubURL in the ssdpPath: /static/device_description.xml
 def subscribeNotifications() {
+    if (debug) log.trace "--- subscribeNotifications: ${getDataValue("urn")}"
     subscribeAction(getDataValue("urn"), "/api/v1/alarmdecoder/event?apikey=${_get_api_key()}")
 }
 
@@ -345,15 +366,21 @@ def parse_json(String headers, String body) {
     // Build our events list from our current state
     def events = []
     update_state(result).each { e-> events << e }
+
+    return events
 }
 
 // Parse XML and new state. Build UI and return UI update events
 def parse_xml(String headers, String body) {
     log.trace("--- parse_xml")
-
+    if (debug) log.debug(body)
     def xmlResult = new XmlSlurper().parseText(body)
 
     def resultMap = [:]
+    resultMap['eventid'] = xmlResult.property.eventid.toInteger()
+    resultMap['eventdesc'] = xmlResult.property.eventdesc.text()
+    resultMap['eventmessage'] = xmlResult.property.eventmessage.text()
+    resultMap['rawmessage'] = xmlResult.property.rawmessage.text()    
     resultMap['last_message_received'] = xmlResult.property.panelstate.last_message_received.text()
     resultMap['panel_alarming'] = xmlResult.property.panelstate.panel_alarming.toBoolean()
     resultMap['panel_armed'] = xmlResult.property.panelstate.panel_armed.toBoolean()
@@ -365,6 +392,7 @@ def parse_xml(String headers, String body) {
     resultMap['panel_powered'] = xmlResult.property.panelstate.panel_powered.toBoolean()
     resultMap['panel_ready'] = xmlResult.property.panelstate.panel_ready.toBoolean()
     resultMap['panel_type'] = xmlResult.property.panelstate.panel_type.text()
+    resultMap['panel_chime'] = xmlResult.property.panelstate.panel_chime.toBoolean()    
 
     // build list of faulted zones unpack xml
     // only update zone list on zone change events
@@ -384,8 +412,9 @@ def parse_xml(String headers, String body) {
 
     // Build our events list from our current state
     def events = []
+    if (debug) log.debug("---  update_state in:****** ${resultMap}")
     update_state(resultMap).each { e-> events << e }
-
+    if (debug) log.debug("---  update_state out:****** ${events}")
     return events
 }
 
@@ -426,41 +455,12 @@ def parse(String description) {
 
     }
 
-    if (debug)
-       log.debug("---  parse: ${rID}: events: ${events}")
+    if (debug) log.debug("---  parse: ${rID}: events: ${events}")
 
     return events
 }
 
 /*** Capabilities ***/
-
-def on() {
-    log.trace("--- switch.on (arm stay)")
-    arm_stay()
-}
-
-def off() {
-    log.trace("--- switch.off (disarm)")
-    disarm()
-}
-
-def strobe() {
-    log.trace("--- alarm.strobe, do nothing")
-}
-
-def siren() {
-    log.trace("--- alarm.siren, do nothing")
-}
-
-def lock() {
-    log.trace("--- lock.lock (arm)")
-    arm_away()
-}
-
-def unlock() {
-    log.trace("--- lock.unlock (disarm)")
-    disarm()
-}
 
 def refresh() {
     log.trace("--- handler.refresh")
@@ -472,7 +472,11 @@ def refresh() {
 }
 
 /*** Commands ***/
-
+/**
+ * disarm()
+ * Sends a disarm command to the panel
+ * TODO: Add security
+ */
 def disarm() {
     log.trace("--- disarm")
 
@@ -489,6 +493,10 @@ def disarm() {
     return send_keys(keys)
 }
 
+/**
+ * arm_away()
+ * Sends an arm away command to the panel
+ */
 def arm_away() {
     log.trace("--- arm_away")
 
@@ -505,6 +513,10 @@ def arm_away() {
     return send_keys(keys)
 }
 
+/**
+ * arm_stay()
+ * Sends an arm stay command to the panel
+ */
 def arm_stay() {
     log.trace("--- arm_stay")
 
@@ -521,6 +533,10 @@ def arm_stay() {
     return send_keys(keys)
 }
 
+/**
+ * fire()
+ * Sends an fire alarm command to the panel
+ */
 def fire() {
     log.trace("--- fire")
     state.fire_started = null
@@ -552,6 +568,10 @@ def checkFire() {
     }
 }
 
+/**
+ * panic()
+ * Sends an panic alarm command to the panel
+ */
 def panic() {
     log.trace("--- panic")
     state.panic_started = null
@@ -583,6 +603,10 @@ def checkPanic() {
     }
 }
 
+/**
+ * aux()
+ * Sends an aux alarm command to the panel
+ */
 def aux() {
     log.trace("--- aux")
     state.aux_started = null
@@ -614,6 +638,92 @@ def checkAux() {
     }
 }
 
+/**
+ * bypassN()
+ * Bypass the zone indicated on this tile
+ */
+def bypass1() {
+    bypassN(1)
+} 
+def bypass2() {
+    bypassN(2)
+}
+def bypass3() {
+    bypassN(3)
+}
+def bypass4() {
+    bypassN(4)
+}
+def bypass5() {
+    bypassN(5)
+}
+def bypass6() {
+    bypassN(6)
+}
+def bypass7() {
+    bypassN(7)
+}
+def bypass8() {
+    bypassN(8)
+}
+def bypass9() {
+    bypassN(9)
+}
+def bypass10() {
+    bypassN(10)
+}
+def bypass11() {
+    bypassN(10)
+}
+def bypass12() {
+    bypassN(10)
+}
+
+def bypassN(szValue) {
+    def zone = device.currentValue("zoneStatus${szValue}")
+    bypass(zone)
+}
+
+def bypass(zone) {
+   log.trace("--- bypass ${zone}")
+   
+    // if no zone then skip
+    if(!zone.toInteger())
+      return;
+
+    def user_code = _get_user_code()
+    def keys = ""
+
+    if (settings.panel_type == "ADEMCO")
+        keys = "${user_code}6" + zone.padLeft(2,"0") + "*"
+    else if (settings.panel_type == "DSC")
+        keys = "*1" + zone.padLeft(2,"0")
+    else
+        log.warn("--- bypass: unknown panel_type.")
+
+    return send_keys(keys)
+}
+
+
+/**
+ * chime()
+ * Sends a chime command to the panel
+ */
+def chime() {
+    log.trace("--- chime")
+    def user_code = _get_user_code()
+    def keys = ""
+
+    if (settings.panel_type == "ADEMCO")
+        keys = "${user_code}9*"
+    else if (settings.panel_type == "DSC")
+        keys = "<S6>"
+    else
+        log.warn("--- chime: unknown panel_type.")
+
+    return send_keys(keys)
+}
+
 /*** Business Logic ***/
 
 def update_state(data) {
@@ -637,13 +747,32 @@ def update_state(data) {
 
     def panel_state = (data.panel_ready ? "ready" : "notready")
 
+    // Update our ready indicator virtual device
+    if (forceguiUpdate || data.panel_ready != state.panel_ready)
+        events << createEvent(name: "ready-set", value: data.panel_ready ? "close" : "open", displayed: true, isStateChange: true)
+
+    // Event Type 14 CID send raw data upstream if we find one
+    if (data.eventid == 14) {
+        events << createEvent(name: "cid-set", value: data.rawmessage, displayed: true, isStateChange: true)        
+    }
+
+    // Event Type 5 Bypass
+    if (data.eventid == 5) {
+        log.debug("bypass-set: ${data.panel_bypassed}")
+        events << createEvent(name: "bypass-set", value: data.panel_bypassed ? "open" : "close", displayed: true, isStateChange: true)
+    }
+
+    // Event Type 16 Chime
+    if (data.eventid == 16) {
+        events << createEvent(name: "chime-set", value: data.panel_chime ? "on" : "off", displayed: true, isStateChange: true)
+    }
+
     if (armed) {
         panel_state = (data.panel_armed_stay ? "armed_stay" : "armed")
     }
 
     //FORCE ARMED if ALARMING to be sure SHM gets it as it will not show alarms if not armed :(
     if (data.panel_alarming) {
-        armed = true
         panel_state = "alarming"
     }
 
@@ -656,23 +785,33 @@ def update_state(data) {
     if (forceguiUpdate || data.panel_fire_detected != state.panel_fire_detected)
         events << createEvent(name: "smoke-set", value: data.panel_fire_detected ? "detected" : "clear", displayed: true, isStateChange: true)
 
-    // If STAY/AWAY changes data.panel_armed_stay
-    if (forceguiUpdate || data.panel_armed_stay != state.panel_armed_stay)
-        events << createEvent(name: "lock", value: data.panel_armed_stay ? "lock" : "unlock", displayed: true, isStateChange: true)
+    // If armed STAY changes data.panel_armed_stay
+    if (forceguiUpdate || data.panel_armed_stay != state.panel_armed_stay) {
+        if(data.panel_armed_stay) {
+            events << createEvent(name: "arm-stay-set", value: "on", displayed: true, isStateChange: true)
+            events << createEvent(name: "arm-away-set", value: "off", displayed: true, isStateChange: true)
+        }
+    }
 
     // If the panel ARMED state changes
-    if (forceguiUpdate || armed != state.armed)
-        events << createEvent(name: "armed", value: armed ? "armed" : "disarmed", displayed: true, isStateChange: true)
-
-    // If the PANIC state changes
-    if (forceguiUpdate || data.panel_alarming != state.alarming)
-        events << createEvent(name: "alarm", value: data.panel_alarming ? "both" : "off", displayed: true, isStateChange: true)
+    if (forceguiUpdate || armed != state.armed) {
+       if(!armed) {
+           events << createEvent(name: "arm-away-set", value: "off", displayed: true, isStateChange: true)
+           events << createEvent(name: "arm-stay-set", value: "off", displayed: true, isStateChange: true)
+       } else {
+           // If armed AWAY changes data.panel_armed_away
+           if(!data.panel_armed_stay)
+               events << createEvent(name: "arm-away-set", value: "on", displayed: true, isStateChange: true)
+       }
+    }
 
     // set our panel_state
-    if (forceguiUpdate || panel_state != state.panel_state)
+    if (forceguiUpdate || panel_state != state.panel_state) {
+        log.trace("--- update_state: new state ************** ${panel_state} ************")
         events << createEvent(name: "panel_state", value: panel_state, displayed: true, isStateChange: true)
+    }
 
-    // Create an event to notify Smart Home Monitor.
+    // build our alarm_status value
     def alarm_status = "off"
     if (armed)
     {
@@ -681,15 +820,15 @@ def update_state(data) {
             alarm_status = "stay"
     }
 
-    // Update SHM
+    // Create an event to notify Smart Home Monitor in our service.
     // "enum", ["off", "stay", "away"]
     if (forceguiUpdate || alarm_status != state.alarm_status)
         events << createEvent(name: "alarmStatus", value: alarm_status, displayed: true, isStateChange: true)
 
-    // Update our contact sensor so SHM or others know we are in an alarm state. In alarm close contact.
+    // Update our alarming switch so SHM or others know we are in an alarm state. In alarm close contact.
     // "enum", ["open", "close"]
-    if (forceguiUpdate || data.panel_alarming != state.alarming)
-        events << createEvent(name: "contact", value: data.panel_alarming ? "open" : "close", displayed: true, isStateChange: true)
+    if (forceguiUpdate || data.panel_alarming != state.panel_alarming)
+        events << createEvent(name: "alarmbell-set", value: data.panel_alarming ? "open" : "close", displayed: true, isStateChange: true)
 
     // will only add events for zones that change state.
     def zone_events = build_zone_events(data)
@@ -701,6 +840,7 @@ def update_state(data) {
     state.armed = armed
 
     /// raw panel state bits
+    state.panel_ready = data.panel_ready
     state.panel_armed = data.panel_armed
     state.panel_armed_stay = data.panel_armed_stay
     state.panel_fire_detected = data.panel_fire_detected
@@ -709,11 +849,13 @@ def update_state(data) {
     state.panel_powered = data.panel_powered
     state.panel_on_battery = data.panel_on_battery
     state.panel_ready = data.panel_ready
-
+    state.panel_chime = data.chime
     return events
 }
 
 /*** Utility ***/
+
+
 
 private def build_zone_events(data) {
     def events = []
@@ -727,21 +869,21 @@ private def build_zone_events(data) {
     // if we have no tag then do nothing.
     def current_faults = data.panel_zones_faulted
     if (current_faults == null)
-      return
-      
+      return events
+
     def number_of_zones_faulted = current_faults.size()
 
     def new_faults = current_faults.minus(state.faulted_zones)
     def cleared_faults = state.faulted_zones.minus(current_faults)
 
-    //log.trace("Current faulted zones: ${temp_faultedzones}")
-    //log.trace("New faults: ${new_faults}")
-    //log.trace("Cleared faults: ${cleared_faults}")
+    if (debug) log.trace("Current faulted zones: ${current_faults}")
+    if (debug) log.trace("New faults: ${new_faults}")
+    if (debug) log.trace("Cleared faults: ${cleared_faults}")
 
     // Trigger switches for newly faulted zones.
     for (def i = 0; i < new_faults.size(); i++)
     {
-        //log.trace("Setting switch ${new_faults[i]}")
+        if (debug) log.trace("Setting switch ${new_faults[i]}")
         def switch_events = update_zone_switches(new_faults[i], true)
         events = events.plus(switch_events)
     }
@@ -749,7 +891,7 @@ private def build_zone_events(data) {
     // Reset switches for cleared zones.
     for (def i = 0; i < cleared_faults.size(); i++)
     {
-        //log.trace("Clearing switch ${cleared_faults[i]}")
+        if (debug) log.trace("Clearing switch ${cleared_faults[i]}")
         def switch_events = update_zone_switches(cleared_faults[i], false)
         events = events.plus(switch_events)
     }
@@ -757,8 +899,12 @@ private def build_zone_events(data) {
     //log.trace("Filling zone tiles..")
 
     // Fill zone tiles
-	def sensorMap = getSensorMap();									   
+/*** Sensors ***/
+def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
+def sensorKeys = sensorMap.keySet() as String[]; 
     for (def i = 1; i <= sensorMap.size(); i++) {
+	def currentSensorKey = sensorKeys[i];	
+	def currentSensorValue = sensorMap[currentSensorKey];	
         if (number_of_zones_faulted > 0 && i <= number_of_zones_faulted) {
             if ((device.currentValue("zoneStatus${i}") ?: "0").toInteger() != current_faults[i-1])
                 events << createEvent(name: "zoneStatus${i}", value: current_faults[i-1], displayed: true)
@@ -776,11 +922,15 @@ private def build_zone_events(data) {
 
 private def update_zone_switches(zone, faulted) {
     def events = []
-def sensorMap = getSensorMap();
+/*** Sensors ***/
+def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
+def sensorKeys = sensorMap.keySet() as String[]; 
     // Iterate through the zone tracker settings.  If the zone number matches,
     // trigger an event for the service manager to use to flip the virtual
     // switches.
     for (def i = 1; i <= sensorMap.size(); i++) {
+def currentSensorKey = sensorKeys[i];	
+	def currentSensorValue = sensorMap[currentSensorKey];	
         if (zone == settings."zonetracker${i}zone") {
             if (faulted)
                 events << createEvent(name: "zone-on", value: i, isStateChange: true, displayed: false)
@@ -887,8 +1037,11 @@ private def parseEventMessage(String description) {
 }
 
 def send_keys(keys) {
-    log.trace("--- send_keys: keys=${keys}")
-
+    if (debug)
+      log.trace("--- send_keys: keys=${keys}")
+    else
+      log.trace("--- send_keys")
+      
     def urn = getDataValue("urn")
     def apikey = _get_api_key()
 
@@ -939,11 +1092,11 @@ def _get_api_key() {
  *
  */
 def subscribeAction(urn, path, callbackPath="") {
-    log.trace "subscribeAction(${urn}, ${path}, ${callbackPath})"
+    if (debug) log.trace "subscribeAction(${urn}, ${path}, ${callbackPath})"
 
     // get our HUBs details so the AlarmDecoder knows how to call us back on events
     def address = getCallBackAddress()
-
+    if (debug) log.trace "our address ${address}"
     def result = new physicalgraph.device.HubAction(
         method: "SUBSCRIBE",
         path: path,
@@ -959,8 +1112,7 @@ def subscribeAction(urn, path, callbackPath="") {
     result.requestId = "SUBSCRIBE"
 
     // log.debug "SUBSCRIBE result: ${result}"
-
-    return result
+    sendHubCommand(result)
 
 }
 
