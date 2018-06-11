@@ -2,7 +2,7 @@ This repository provides support for the AlarmDecoder webapp inside of the Smart
 
 ## Requirements
 
-* AlarmDecoder webapp 0.8.1+
+* AlarmDecoder webapp 0.8.2+
 * SmartThings Hub
 
 ## Features
@@ -32,12 +32,16 @@ Capabilities:  Momentary
 Description: indicator to show the Chime state.
 -- Action **'push'** will toggle the chime state.  
 States: [on, off]  
- -- state is not working and will require a future AD2 Web app update.  
 
 * AD2 Ready  
 Capabilities: Contact Sensor  
 Description: An indicator to show the panel ready to arm state.  
 States: [open, close = Ready]  
+
+* AD2 Bypass  
+Capabilities: Contact Sensor  
+Description: An indicator to show if the panel has a bypassed zone.  
+States: [open = Zone(s) Bypassed, close]  
 
 * AD2 Smoke Alarm  
 Capabilities: smokeDetector  
@@ -76,9 +80,9 @@ Capabilities: Contact Sensor
 Description: An indicator to show the zone state  
 States: [open , close] * reversible in parent device settings  
 
-* AD2 CID-NNN  
+* AD2 CID-***AAA***-***B***-***CCC***  
 Capabilities: Momentary  
-Description: Indicates the state of the given   Contact ID report state. The action **'push'** will restore to closed state  
+Description: Indicates the state of the given Contact ID report state. The action **'push'** will restore to closed state. ***AAA*** is the Contact ID number ***B*** is the partition and ***CCC*** is the zone or user code to match with '...' matching all. Ex. CID-401-012 will monitor user 012 arming/disarming. Supports regex in the deviceNetworkId to allow to create devices that can trigger on multiple CID messages such as ***"CID-4[0,4]]1-1-..."*** will monitor all users for arming/disarming away or stay on partition 1.  
 States: [on, off]  
 
 ## Setup

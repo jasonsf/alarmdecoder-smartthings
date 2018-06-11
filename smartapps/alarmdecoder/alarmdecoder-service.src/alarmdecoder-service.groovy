@@ -51,7 +51,7 @@ preferences {
     page(name: "page_remove_all", title: titles("page_remove_all"), content: "page_remove_all", install: false, uninstall: false)
     page(name: "page_cid_management", title: titles("page_cid_management"), content: "page_cid_management", install: false, uninstall: false)
     page(name: "page_add_new_cid", title: titles("page_add_new_cid"), content: "page_add_new_cid", install: false, uninstall: false)
-    page(name: "page_add_new_cid_confirm", title: titles("page_add_new_cid_confirm"), content: "page_add_new_cid_confirm", install: false, uninstall: false)
+    page(name: "page_add_new_cid_confirm", title: titles("page_add_new_cid_confirm", buildcidlabel()), content: "page_add_new_cid_confirm", install: false, uninstall: false)
     page(name: "page_remove_selected_cid", title: titles("page_remove_selected_cid"), content: "page_remove_selected_cid", install: false, uninstall: false)
 }
 
@@ -65,20 +65,34 @@ def titles(String name, Object... args) {
     "page_main": "${lname} setup and management",
     "page_discover_devices": "Install ${lname} service",
     "page_remove_all": "Remove all ${lname} devices",
+    "confirm_remove_all": "Confirm remove all",
     "page_cid_management": "Contact ID device management",
     "page_add_new_cid": "Add new CID virtual switch",
-    "page_add_new_cid_confirm": "Add new CID virtual switch",
+    "page_add_new_cid_confirm": "Add new CID switch : %s",
     "page_remove_selected_cid": "Remove selected virtual switches",
+    "href_refresh_devices": "Send UPNP discovery",
+    "section_cid_value": "Build CID Value(USER/ZONE) : %s",
+    "section_cid_partition": "Select the CID partition",
+    "section_cid_names": "Device Name and Label",
+    "section_build_cid": "Build CID Number :",
+    "input_cid_name": "Enter the new device name or blank for auto",
+    "input_cid_label": "Enter the new device label or blank for auto",    
+    "info_page_remove_selected_cid": "Attempted to remove selected devices. This may fail if the device is in use. If it fails review the log and manually remove the usage. Press back to continue.",
+    "info_add_new_cid_confirm": "Attempted to add new CID device. This may fail if the device is in use. If it fails review the log. Press back to continue.",
+    "info_remove_all_a": "Removed all child devices.",
+    "info_remove_all_b": "This will attempt to remove all child devices. This may fail if the device is in use. If it fails review the log and manually remove the usage. Press back to continue.",
     "input_cid_devices": "Remove installed CID virutal switches",
     "input_cid_number": "Select the CID number for this device",
-    "input_cid_number_raw": "Enter raw CID number",
+    "input_cid_value": "Zero PAD 3 digit User,Zone or simple regex pattern ex. '001' or '...'",
+    "input_cid_partition": "Enter the partition or 0 for system",
+    "input_cid_number_raw": "Enter CID # or simple regex pattern",
     "input_selected_devices": "Select device(s) (%s found)",
     "defaultSensorToClosed": "Default zone sensors to closed?",
     "shmIntegration": "Integrate with Smart Home Monitor?",
-    "shmChangeSHMStatus": "Automatically change Smart Home Monitor status when armed or disarmed?"
+    "shmChangeSHMStatus": "Automatically change Smart Home Monitor status when armed or disarmed?",
   ]
   if (args)
-      return String.format(page_titles[name],args)
+      return String.format(page_titles[name], args)
   else
       return page_titles[name]
 }
@@ -94,7 +108,7 @@ def descriptions(name, Object... args) {
     "href_refresh_devices": "Tap to select",
     "href_remove_selected_cid": "Tap to remove selected virtual switches",
     "href_add_new_cid": "Tap to add new CID switch",
-    "href_add_new_cid_confirm": "Tap to add"
+    "href_add_new_cid_confirm": "Tap to confirm and add"
   ]
   if (args)
       return String.format(element_descriptions[name],args)
@@ -189,6 +203,7 @@ def page_cid_management() {
  * Page page_remove_selected_cid generator
  */
 def page_remove_selected_cid() {
+    def errors = []
     getAllChildDevices().each { device ->
         if (device.deviceNetworkId.contains(":CID-"))
         {
@@ -198,14 +213,24 @@ def page_remove_selected_cid() {
             if (d)
             {
                 log.trace("removing CID device ${device.deviceNetworkId}")
-                deleteChildDevice(device.deviceNetworkId)
-                input_cid_devices.remove(device_name)
+                try {
+                    deleteChildDevice(device.deviceNetworkId)
+                    input_cid_devices.remove(device_name)
+                    errors << "Success removing " + device_name                    
+                }
+                catch (e) { 
+                    log.error "There was an error (${e}) when trying to delete the child device"
+                    errors << "Error removing " + device_name
+                }
             }
         }
     }
     return dynamicPage(name: "page_remove_selected_cid") {
         section("") {
-            paragraph "Attempted to remove selected devices. This may fail if the device is in use. If it fails review the log and manually remove the usage. Press back to continue."
+            paragraph titles("info_page_remove_selected_cid")
+            errors.each { error -> 
+                paragraph(error)
+            }
         }
     }
 }
@@ -216,56 +241,125 @@ def page_remove_selected_cid() {
 def page_add_new_cid() {
     // list of some of the CID #'s and descriptions.
     // 000 will trigger a manual input of the CID number.
-    def cid_numbers = [  0: "000 - Other / Custom",
-                       101: "101 - Pendant Transmitter",
-                       150: "150 - 24 HOUR (AUXILIARY)",
-                       154: "154 - Water Leakage",
-                       158: "158 - High Temp",
-                       162: "162 - Carbon Monoxide Detected"]
-
+    def cid_numbers = [  "0": "000 - Other / Custom",
+                       "101": "101 - Pendant Transmitter",
+                       "110": "110 - Fire",
+                       "150": "150 - 24 HOUR (AUXILIARY)",
+                       "154": "154 - Water Leakage",
+                       "158": "158 - High Temp",
+                       "162": "162 - Carbon Monoxide Detected",
+                       "401": "401 - Arm AWAY OPEN/CLOSE",
+                       "441": "441 - Arm STAY OPEN/CLOSE",
+                       "4[0,4]1": "4[0,4]1 - Arm Stay or Away OPEN/CLOSE"]
+    
     return dynamicPage(name: "page_add_new_cid") {
         // show pre defined CID number templates to select from
         section("") {
+            paragraph titles("section_build_cid", buildcid())
             input "input_cid_number", "enum", required: true, submitOnChange: true, multiple: false, title: titles("input_cid_number"), description: descriptions("input_cid_number"), options: cid_numbers 
         }
-        // if a CID entry is selected then check the value if it is > 0 to show raw input section
+        // if a CID entry is selected then check the value if it is "0" to show raw input section
         if (input_cid_number) {
-            if (!input_cid_number.toInteger()) {
+            if (input_cid_number == "0") {
                 section {
-                    input(name: "input_cid_number_raw", type: "number", required: true, submitOnChange: true, title: titles("input_cid_number_raw"))
+                    input(name: "input_cid_number_raw", type: "text", required: true, defaultValue: 110, submitOnChange: true, title: titles("input_cid_number_raw"))
                 }
             }
-            // If input_cid_number has a value > 0 or input_cid_number_raw is > 0
-            if (input_cid_number.toInteger() || input_cid_number_raw) {
-                section(""){ href(name: "href_add_new_cid_confirm", required: false, page: "page_add_new_cid_confirm", title: titles("page_add_new_cid_confirm"), description: descriptions("href_add_new_cid_confirm"))}
-                section_no_save_note()
+            section {
+                paragraph titles("section_cid_value", buildcidvalue())
+                input(name: "input_cid_value", type: "text", required: true, defaultValue: 001,submitOnChange: true, title: titles("input_cid_value"))
             }
+            section {
+                paragraph titles("section_cid_partition")
+                input(name: "input_cid_partition", type: "number", required: false, defaultValue: 1, submitOnChange: true, title: titles("input_cid_partition"))
+            }
+            section {
+                paragraph titles("section_cid_names")
+                input(name: "input_cid_name", type: "text", required: false, submitOnChange: true, title: titles("input_cid_name"))
+                input(name: "input_cid_label", type: "text", required: false, submitOnChange: true, title: titles("input_cid_label"))
+            }
+            // If input_cid_number or input_cid_number_raw have a value
+            if ( (input_cid_number && (input_cid_number != "0")) || (input_cid_number_raw)) {
+                section(""){ href(name: "href_add_new_cid_confirm", required: false, page: "page_add_new_cid_confirm", title: titles("page_add_new_cid_confirm", buildcidlabel()+"("+buildcidnetworkid()+")"), description: descriptions("href_add_new_cid_confirm"))}
+            }
+            section_no_save_note()
         }
     }
+}
+
+/**
+ * Helper to build a final CID value from inputs
+ */
+def buildcid() {
+    def cidnum = ""
+    if (input_cid_number == "0") {
+        cidnum = input_cid_number_raw
+    } else {
+        cidnum = input_cid_number
+    }
+    return cidnum
+}
+
+def buildcidname() {
+    if (input_cid_name) {
+        return "CID-" + input_cid_name
+    } else {
+        return buildcidnetworkid()
+    }
+}
+
+def buildcidlabel() {
+    if (input_cid_label) {
+        return "CID-" + input_cid_label
+    } else {
+        return buildcidnetworkid()
+    }
+}
+
+def buildcidnetworkid() {
+    // get the CID value
+    def newcid =  buildcid()
+
+    def cv = buildcidvalue()
+    def pt = input_cid_partition
+    return "CID-${newcid}-${pt}-${cv}"
+}
+
+def buildcidvalue() {
+    def cidval = input_cid_value
+    return cidval
 }
 
 /**
  * Page page_add_new_cid_confirm generator.
  */
 def page_add_new_cid_confirm() {
-
+    def errors = []
     // get the CID value
-    def newcid = input_cid_number.toInteger()
-    if (!newcid)
-        newcid = input_cid_number_raw
-
+    def newcidlabel =  buildcidlabel()
+    def newcidname = buildcidname()
+    def newcidnetworkid = buildcidnetworkid()
+    def cv = input_cid_value
+    def pt = input_cid_partition.toInteger()
+    
     // Add virtual CID switch if it does not exist.
-    def d = getChildDevice("${state.ip}:${state.port}:CID-${newcid}")
+    def d = getChildDevice("${state.ip}:${state.port}:${newcidlabel}")
     if (!d)
     {
-        def nd = addChildDevice("alarmdecoder", "AlarmDecoder action button indicator", "${state.ip}:${state.port}:CID-${newcid}", state.hub,
-                                [name: "${state.ip}:${state.port}:CID-${newcid}", label: "${sname} CID-${newcid}", completedSetup: true])
+        def nd = addChildDevice("alarmdecoder", "AlarmDecoder action button indicator", "${state.ip}:${state.port}:${newcidnetworkid}", state.hub,
+                                [name: "${state.ip}:${state.port}:${newcidname}", label: "${sname} ${newcidlabel}", completedSetup: true])
         nd.sendEvent(name: "switch", value: "off", isStateChange: true, displayed: false)
+        errors << "Success adding ${newcidlabel}"
+    } else {
+        errors << "Error adding ${newcidlabel}: Exists" 
     }
 
     return dynamicPage(name: "page_add_new_cid_confirm") {
         section("") {
-            paragraph "Attempting to add new CID device. This may fail if the device is in use. If it fails review the log. Press back to continue."
+            paragraph titles("info_add_new_cid_confirm")
+            errors.each { error -> 
+                paragraph(error)
+            }            
         }
     }
 }
@@ -273,11 +367,21 @@ def page_add_new_cid_confirm() {
 /**
  * Page page_remove_all generator.
  */
-def page_remove_all() {
-    uninstalled()
+def page_remove_all(params) {
+    def message = ""
+
     return dynamicPage(name: "page_remove_all") {
+        if (params?.confirm) {
+            uninstalled()
+            message = titles("info_remove_all_a")
+        } else {
+            section("") {
+                href(name: "href_confirm_remove_all_devices", title: titles("confirm_remove_all"), description: descriptions("href_refresh_devices"), required: false, page: "page_remove_all", params: [confirm: true])
+            }
+            message = titles("info_remove_all_b")
+        }
         section("") {
-            paragraph "Attempted to remove all child devices. This may fail if the device is in use. If it fails review the log and manually remove the usage. Press back to continue."
+            paragraph message
         }
     }
 }
@@ -305,7 +409,7 @@ def page_discover_devices() {
         section("Devices") {
             input "input_selected_devices", "enum", required: true, title: titles("input_selected_devices",numFound), multiple: true, options: found_devices
             // Allow user to force a new UPNP discovery message
-            href(name: "href_refresh_devices", title: titles("page_discover_devices"), description: descriptions("href_refresh_devices"), required: false, page: "page_discover_devices")
+            href(name: "href_refresh_devices", title: titles("href_refresh_devices"), description: descriptions("href_refresh_devices"), required: false, page: "page_discover_devices")
         }
         section("Smart Home Monitor Integration") {
             input(name: "shmIntegration", type: "bool", defaultValue: true, title: titles("shmIntegration"))
@@ -514,7 +618,8 @@ def locationHandler(evt) {
  */
 def webserviceUpdate()
 {
-    if (debug) log.debug "webserviceUpdate"
+    log.trace "webserviceUpdate"
+    refresh_alarmdecoders()
     return [status: "OK"]
 }
 
@@ -614,7 +719,7 @@ def alarmBellSet(evt) {
       log.debug("alarmBellSet ${evt.value}")
     def d = getChildDevice("${state.ip}:${state.port}:alarmBellIndicator")
     if (!d) {
-        log.error("alarmBellSet: Could not find 'alarmBell' device.")
+        log.error("alarmBellSet: Could not find 'alarmBellIndicator' device.")
         return
     }
     d.sendEvent(name: "contact", value: evt.value, isStateChange: true, filtered: true)
@@ -627,10 +732,23 @@ def chimeSet(evt) {
     if (debug) log.debug("chimeSet ${evt.value}")
     def d = getChildDevice("${state.ip}:${state.port}:chimeMode")
     if (!d) {
-        log.error("chimeSet: Could not find device 'chime'")
+        log.error("chimeSet: Could not find device 'chimeMode'")
         return
     }
     d.sendEvent(name: "switch", value: evt.value, isStateChange: true, filtered: true)
+}
+
+/**
+ * send event to bypass indicator device to set state
+ */
+def bypassSet(evt) {
+    if (debug) log.debug("bypassSet ${evt.value}")
+    def d = getChildDevice("${state.ip}:${state.port}:bypass")
+    if (!d) {
+        log.error("bypassSet: Could not find device 'bypass'")
+        return
+    }
+    d.sendEvent(name: "contact", value: evt.value, isStateChange: true, filtered: true)
 }
 
 /**
@@ -651,27 +769,46 @@ def readySet(evt) {
  * evt.value example !LRR:001,1,CID_1406,ff
  */
 def cidSet(evt) {
-    if (debug) log.debug("cidSet ${evt.value}")
+    log.info("cidSet ${evt.value}")
 
     // get our CID state and number
     def parts = evt.value.split(',')
 
     // 1 digit QUALIFIER 1 = Event or Open, 3 = Restore or Close   
-    def cidstate = parts[2][-4..-4]
-    
+    def cidstate = (parts[2][-4..-4] == "1") ? "on" : "off"
+
     // 3 digit CID number
     def cidnum = parts[2][-3..-1]
-    
-    if (debug) log.debug("cidSet state:${cidstate} num:${cidnum}")
 
-    def d = getChildDevice("${state.ip}:${state.port}:CID-${cidnum}")
-    if (!d) {
-        log.error("cidSet: Could not find 'CID-${cidnum}' device.")
+    // the CID report value. Zone # or User # or ...
+    def cidvalue = parts[0].split(':')[1]
+
+    // the partition # with 0 being system
+    def partition =  parts[1].toInteger()
+
+    if (debug) log.debug("cidSet num:${cidnum} part: ${partition} state:${cidstate} val:${cidvalue}")
+
+    def sent = false
+    def rawmsg = evt.value
+    def device_name = "CID-${cidnum}-${partition}-${cidvalue}"
+    def children = getChildDevices()
+    children.each {
+        if (it.deviceNetworkId.contains(":CID-")) {
+            def match = it.deviceNetworkId.split(":")[2].trim()
+            if (device_name =~ /${match}/) {
+                if (debug) log.error("cidSet device: ${device_name} matches ${match} sendng state ${cidstate}")
+                it.sendEvent(name: "switch", value: cidstate, isStateChange: true, filtered: true)
+                sent = true
+            } else {
+                if (debug) log.error("cidSet device: ${device_name} no match ${match}")
+            }
+        }
+    }
+
+    if (!sent) {
+        log.error("cidSet: Could not find 'CID-${cidnum}-${partition}-${cidvalue}|XXX' device.")
         return
     }
-    def rawmsg = evt.value
-    def cidValue = ( cidstate == "1" ? "on" : "off" )
-    d.sendEvent(name: "switch", value: cidValue, isStateChange: true, filtered: true)
 }
 
 /**
@@ -681,7 +818,7 @@ def cidSet(evt) {
 def zoneOn(evt) {
     if (debug) log.debug("zoneOn: desc=${evt.value}")
 
-    def d = getChildDevices().find { it.deviceNetworkId.contains("switch${evt.value}") }
+    def d = getChildDevices().find { it.deviceNetworkId.endsWith("switch${evt.value}") }
     if (d)
     {
         def sensorValue = "closed"
@@ -699,7 +836,7 @@ def zoneOn(evt) {
 def zoneOff(evt) {
     if (debug) log.debug("zoneOff: desc=${evt.value}")
 
-    def d = getChildDevices().find { it.deviceNetworkId.contains("switch${evt.value}") }
+    def d = getChildDevices().find { it.deviceNetworkId.endsWith("switch${evt.value}") }
     if (d)
     {
         def sensorValue = "open"
@@ -910,7 +1047,7 @@ def addExistingDevices() {
 
             }
             // Add virtual zone contact sensors if they do not exist.
-            for (def i = 0; i < 8; i++)
+            for (def i = 0; i < 12; i++)
             {
                 def newSwitch = state.devices.find { k, v -> k == "${state.ip}:${state.port}:switch${i+1}" }
                 if (!newSwitch)
@@ -960,6 +1097,15 @@ def addExistingDevices() {
                 def nd = addChildDevice("alarmdecoder", "AlarmDecoder action button indicator", "${state.ip}:${state.port}:chimeMode", state.hub,
                 [name: "${state.ip}:${state.port}:chimeMode", label: "${sname} Chime", completedSetup: true])
                 nd.sendEvent(name: "switch", value: "off", isStateChange: true, displayed: false)
+            }
+
+            // Add virtual Bypass switch if it does not exist.
+            cd = state.devices.find { k, v -> k == "${state.ip}:${state.port}:bypass" }
+            if (!cd)
+            {
+                def nd = addChildDevice("alarmdecoder", "AlarmDecoder status indicator", "${state.ip}:${state.port}:bypass", state.hub,
+                [name: "${state.ip}:${state.port}:bypass", label: "${sname} Bypass", completedSetup: true])
+                nd.sendEvent(name: "contact", value: "close", isStateChange: true, displayed: false)
             }
 
             // Add virtual Ready contact if it does not exist.
@@ -1042,6 +1188,9 @@ private def configureDeviceSubscriptions() {
 
     // subscribe to chime handler
     subscribe(device, "chime-set", chimeSet, [filterEvents: false])
+
+    // subscribe to bypass handler
+    subscribe(device, "bypass-set", bypassSet, [filterEvents: false])
 
     // subscribe to alarm bell handler
     subscribe(device, "alarmbell-set", alarmBellSet, [filterEvents: false])

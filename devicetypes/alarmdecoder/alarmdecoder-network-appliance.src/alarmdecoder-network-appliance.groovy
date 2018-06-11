@@ -37,6 +37,10 @@ preferences {
         input("zonetracker6zone", "number", title: "ZoneTracker Sensor #6", description: "Zone number to associate with this contact sensor.")
         input("zonetracker7zone", "number", title: "ZoneTracker Sensor #7", description: "Zone number to associate with this contact sensor.")
         input("zonetracker8zone", "number", title: "ZoneTracker Sensor #8", description: "Zone number to associate with this contact sensor.")
+        input("zonetracker9zone", "number", title: "ZoneTracker Sensor #9", description: "Zone number to associate with this contact sensor.")
+        input("zonetracker10zone", "number", title: "ZoneTracker Sensor #10", description: "Zone number to associate with this contact sensor.")
+        input("zonetracker11zone", "number", title: "ZoneTracker Sensor #11", description: "Zone number to associate with this contact sensor.")
+        input("zonetracker12zone", "number", title: "ZoneTracker Sensor #12", description: "Zone number to associate with this contact sensor.")
     }
 }
 
@@ -642,7 +646,7 @@ def bypass(zone) {
     def keys = ""
 
     if (settings.panel_type == "ADEMCO")
-        keys = "${user_code}6" + zone.padLeft(2,"0")
+        keys = "${user_code}6" + zone.padLeft(2,"0") + "*"
     else if (settings.panel_type == "DSC")
         keys = "*1" + zone.padLeft(2,"0")
     else
@@ -662,7 +666,7 @@ def chime() {
     def keys = ""
 
     if (settings.panel_type == "ADEMCO")
-        keys = "${user_code}9"
+        keys = "${user_code}9*"
     else if (settings.panel_type == "DSC")
         keys = "<S6>"
     else
@@ -701,6 +705,17 @@ def update_state(data) {
     // Event Type 14 CID send raw data upstream if we find one
     if (data.eventid == 14) {
         events << createEvent(name: "cid-set", value: data.rawmessage, displayed: true, isStateChange: true)        
+    }
+
+    // Event Type 5 Bypass
+    if (data.eventid == 5) {
+        log.debug("bypass-set: ${data.panel_bypassed}")
+        events << createEvent(name: "bypass-set", value: data.panel_bypassed ? "open" : "close", displayed: true, isStateChange: true)
+    }
+
+    // Event Type 16 Chime
+    if (data.eventid == 16) {
+        events << createEvent(name: "chime-set", value: data.panel_chime ? "on" : "off", displayed: true, isStateChange: true)
     }
 
     if (armed) {
@@ -855,7 +870,7 @@ private def update_zone_switches(zone, faulted) {
     // Iterate through the zone tracker settings.  If the zone number matches,
     // trigger an event for the service manager to use to flip the virtual
     // switches.
-    for (def i = 1; i <= 8; i++) {
+    for (def i = 1; i <= 12; i++) {
         if (zone == settings."zonetracker${i}zone") {
             if (faulted)
                 events << createEvent(name: "zone-on", value: i, isStateChange: true, displayed: false)
@@ -962,8 +977,11 @@ private def parseEventMessage(String description) {
 }
 
 def send_keys(keys) {
-    log.trace("--- send_keys: keys=${keys}")
-
+    if (debug)
+      log.trace("--- send_keys: keys=${keys}")
+    else
+      log.trace("--- send_keys")
+      
     def urn = getDataValue("urn")
     def apikey = _get_api_key()
 
