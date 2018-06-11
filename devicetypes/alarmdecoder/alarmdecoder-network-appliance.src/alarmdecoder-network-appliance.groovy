@@ -292,7 +292,7 @@ metadata {
         }
 
         main(["status"])
-        details(["status", "arm_disarm", "stay_disarm", "panic", "fire", "aux", "zoneStatus1", "zoneStatus2", "zoneStatus3", "zoneStatus4", "zoneStatus5", "zoneStatus6", "zoneStatus7", "zoneStatus8", "zoneStatus9", "zoneStatus10", "zoneStatus11", "zoneStatus12", "zoneStatus13", "zoneStatus14", "zoneStatus15", "zoneStatus16" "refresh"])
+        details(["status", "arm_disarm", "stay_disarm", "panic", "fire", "aux", "zoneStatus1", "zoneStatus2", "zoneStatus3", "zoneStatus4", "zoneStatus5", "zoneStatus6", "zoneStatus7", "zoneStatus8", "zoneStatus9", "zoneStatus10", "zoneStatus11", "zoneStatus12", "zoneStatus13", "zoneStatus14", "zoneStatus15", "zoneStatus16", "refresh"])
     }
 }
 
