@@ -103,6 +103,10 @@ metadata {
         command "bypass10"
         command "bypass11"
         command "bypass12"        
+        command "bypass13"        
+        command "bypass14"        
+        command "bypass15"        
+        command "bypass16"        
     }
 
     simulator {
@@ -673,10 +677,22 @@ def bypass10() {
     bypassN(10)
 }
 def bypass11() {
-    bypassN(10)
+    bypassN(11)
 }
 def bypass12() {
-    bypassN(10)
+    bypassN(12)
+}
+def bypass13() {
+    bypassN(13)
+}
+def bypass14() {
+    bypassN(14)
+}
+def bypass15() {
+    bypassN(15)
+}
+def bypass16() {
+    bypassN(16)
 }
 
 def bypassN(szValue) {
@@ -688,7 +704,7 @@ def bypass(zone) {
    log.trace("--- bypass ${zone}")
    
     // if no zone then skip
-    if(!zone.toInteger())
+    if(!zone.isInteger())
       return;
 
     def user_code = _get_user_code()
@@ -903,7 +919,7 @@ private def build_zone_events(data) {
 def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
 def sensorKeys = sensorMap.keySet() as String[]; 
     for (def i = 1; i <= sensorMap.size(); i++) {
-	def currentSensorKey = sensorKeys[i];	
+	def currentSensorKey = sensorKeys[i-1];	
 	def currentSensorValue = sensorMap[currentSensorKey];	
         if (number_of_zones_faulted > 0 && i <= number_of_zones_faulted) {
             if ((device.currentValue("zoneStatus${i}") ?: "0").toInteger() != current_faults[i-1])
@@ -929,13 +945,15 @@ def sensorKeys = sensorMap.keySet() as String[];
     // trigger an event for the service manager to use to flip the virtual
     // switches.
     for (def i = 1; i <= sensorMap.size(); i++) {
-def currentSensorKey = sensorKeys[i];	
+def currentSensorKey = sensorKeys[i-1];	
 	def currentSensorValue = sensorMap[currentSensorKey];	
         if (zone == settings."zonetracker${i}zone") {
-            if (faulted)
+            if (faulted) {
                 events << createEvent(name: "zone-on", value: i, isStateChange: true, displayed: false)
-            else
+               }
+            else {
                 events << createEvent(name: "zone-off", value: i, isStateChange: true, displayed: false)
+                }
         }
     }
 
@@ -945,7 +963,6 @@ def currentSensorKey = sensorKeys[i];
 private def parseEventMessage(String description) {
     def event = [:]
     def parts = description.split(',')
-
     parts.each { part ->
         part = part.trim()
         if (part.startsWith('devicetype:')) {
