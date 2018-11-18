@@ -817,9 +817,8 @@ def cidSet(evt) {
  */
 def zoneOn(evt) {
     if (debug) log.debug("zoneOn: desc=${evt.value}")
-    
-    def switchNum = "switch" + evt.value.toString();
-    def d = getChildDevices().find { it.deviceNetworkId.endswith( switchNum ) }
+
+    def d = getChildDevices().find { it.deviceNetworkId.endsWith("switch${evt.value}") }
     if (d)
     {
         def sensorValue = "closed"
@@ -837,8 +836,7 @@ def zoneOn(evt) {
 def zoneOff(evt) {
     if (debug) log.debug("zoneOff: desc=${evt.value}")
 
-    def switchNum = "switch" + evt.value.toString();
-    def d = getChildDevices().find { it.deviceNetworkId.endswith( switchNum ) }
+    def d = getChildDevices().find { it.deviceNetworkId.endsWith("switch${evt.value}") }
     if (d)
     {
         def sensorValue = "open"
