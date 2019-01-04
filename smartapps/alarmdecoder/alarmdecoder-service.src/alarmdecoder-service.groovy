@@ -16,6 +16,7 @@
  * Version 1.0.0 - Scott Petersen - Initial design and release
  * Version 2.0.0 - Sean Mathews <coder@f34r.com> - Changed to use UPNP Push API in AD2 web app
  * Version 2.0.1 - Sean Mathews <coder@f34r.com> - Adding CID device management support.
+ * Version 2.0.2 - Sean Mathews <coder@f34r.com> - Fixed app 20 second max timeout. AddZone is now async, added more zones.
  */
 
 /*
@@ -529,7 +530,7 @@ def locationHandler(evt) {
      return
 
     if (debug)
-      log.debug "locationHandler: description: ${description} name: ${evt.name} value: ${evt.value} data: ${evt.data}"
+      log.debug "locationHandler: description: ${evt.description} name: ${evt.name} value: ${evt.value} data: ${evt.data}"
 
     def parsedEvent = ["hub":hub]
     try {
@@ -812,6 +813,32 @@ def cidSet(evt) {
 }
 
 /**
+ * Handle Device Command addZone()
+ * add a zone during post install to keep it async
+ */
+def addZone(evt) {
+
+    /*** Sensors ***/
+	def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
+	def sensorKeys = sensorMap.keySet() as String[]; 
+    
+    def i = evt.value
+	def currentSensorKey = sensorKeys[i];	
+	def currentSensorValue = sensorMap[currentSensorKey];
+    log.info("location Event: addZone ${i}: ${sensorKeys[i]} ${sensorMap[currentSensorKey]}")
+    def zone_switch = addChildDevice("alarmdecoder", "AlarmDecoder virtual contact sensor", "${evt.data}", state.hub, [name: "${evt.data}", label: "${currentSensorKey}: ${currentSensorValue}", completedSetup: true])
+
+    def sensorValue = "open"
+    if (settings.defaultSensorToClosed == true)
+    sensorValue = "closed"
+
+    // Set default contact state.
+    zone_switch.sendEvent(name: "contact", value: sensorValue, isStateChange: true, displayed: false)
+}
+
+
+
+/**
  * Handle Device Command zoneOn()
  * sets Contact attributes of the alarmdecoder device to open/closed
  */
@@ -909,6 +936,9 @@ def initSubscriptions() {
     /* subscribe to local LAN messages to this HUB on TCP port 39500 and UPNP UDP port 1900 */
     if (debug) log.debug("initialize: subscribe to locations local LAN messages")
     subscribe(location, null, locationHandler, [filterEvents: false])
+
+    // subscribe to add zone handler
+    subscribe(location, "addZone", addZone, [filterEvents: false])   
 }
 
 /**
@@ -1047,27 +1077,16 @@ def addExistingDevices() {
 
             }
 			
-			/*** Sensors ***/
-			def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
-			def sensorKeys = sensorMap.keySet() as String[]; 
 			
+			def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
             // Add virtual zone contact sensors if they do not exist.
             for (def i = 0; i < sensorMap.size(); i++)
             {
-				def currentSensorKey = sensorKeys[i];	
-				def currentSensorValue = sensorMap[currentSensorKey];		
-				
                 def newSwitch = state.devices.find { k, v -> k == "${state.ip}:${state.port}:switch${i+1}" }
                 if (!newSwitch)
                 {
-                    def zone_switch = addChildDevice("alarmdecoder", "AlarmDecoder virtual contact sensor", "${state.ip}:${state.port}:switch${i+1}", state.hub, [name: "${state.ip}:${state.port}:switch${i+1}", label: "${currentSensorKey}: ${currentSensorValue}", completedSetup: true])
-
-                    def sensorValue = "open"
-                    if (settings.defaultSensorToClosed == true)
-                        sensorValue = "closed"
-
-                    // Set default contact state.
-                    zone_switch.sendEvent(name: "contact", value: sensorValue, isStateChange: true, displayed: false)
+                    // send ourself a create device event
+                    sendLocationEvent(name: "addZone", value: "${i+1}", data: "${state.ip}:${state.port}:switch${i+1}")
                 }
             }
 

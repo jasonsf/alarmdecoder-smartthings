@@ -704,7 +704,7 @@ def bypass(zone) {
    log.trace("--- bypass ${zone}")
    
     // if no zone then skip
-    if(!zone.isInteger())
+    if(!zone.toInteger())
       return;
 
     def user_code = _get_user_code()
