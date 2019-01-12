@@ -17,6 +17,7 @@
  * Version 2.0.0 - Sean Mathews <coder@f34r.com> - Changed to use UPNP Push API in AD2 web app
  * Version 2.0.1 - Sean Mathews <coder@f34r.com> - Adding CID device management support.
  * Version 2.0.2 - Sean Mathews <coder@f34r.com> - Fixed app 20 second max timeout. AddZone is now async, added more zones.
+ * Version 2.0.3 - Sean Mathews <coder@f34r.com> - Improved/fixed issues with previous app 20 timeout after more testing.
  */
 
 /*
@@ -150,11 +151,11 @@ def page_main() {
 
     // see if we are already installed
     def foundMsg = ""
-    def mainDevice = getChildDevice("${state.ip}:${state.port}")
-    if (mainDevice) foundMsg = "**** AlarmDecoder already installed ****"
+    def children = getChildDevices()
+    if (children) foundMsg = "**** AlarmDecoder already installed ${children.size()}****"
 
     dynamicPage(name: "page_main") {
-        if (!mainDevice) {
+        if (!children) {
             section("") {
                 href(name: "href_discover", required: false, page: "page_discover_devices", title: titles("page_discover_devices"), description: descriptions("href_discover_devices"))
             }
@@ -819,22 +820,25 @@ def cidSet(evt) {
 def addZone(evt) {
 
     /*** Sensors ***/
-	def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
+	def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Guest Room Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
 	def sensorKeys = sensorMap.keySet() as String[]; 
     
     def i = evt.value
 	def currentSensorKey = sensorKeys[i];	
 	def currentSensorValue = sensorMap[currentSensorKey];
-    log.info("location Event: addZone ${i}: ${sensorKeys[i]} ${sensorMap[currentSensorKey]}")
-    def zone_switch = addChildDevice("alarmdecoder", "AlarmDecoder virtual contact sensor", "${evt.data}", state.hub, [name: "${evt.data}", label: "${currentSensorKey}: ${currentSensorValue}", completedSetup: true])
-
-    def sensorValue = "open"
-    if (settings.defaultSensorToClosed == true)
-    sensorValue = "closed"
-
+    log.info("App Event: addZone ${i}: ${sensorKeys[i]} ${sensorMap[currentSensorKey]}")
+    try {        
+        def zone_switch = addChildDevice("alarmdecoder", "AlarmDecoder virtual contact sensor", "${evt.data}", state.hub, [name: "${evt.data}", label: "${currentSensorKey}: ${currentSensorValue}", completedSetup: true])
+        def sensorValue = "open"
+        if (settings.defaultSensorToClosed == true) {
+            sensorValue = "closed"
+        }
+    
     // Set default contact state.
     zone_switch.sendEvent(name: "contact", value: sensorValue, isStateChange: true, displayed: false)
-}
+    } catch (e) { 
+        log.error "There was an error (${e}) when trying to addZone ${i}"
+    }
 
 
 
@@ -930,15 +934,14 @@ def alarmdecoderAlarmHandler(evt) {
  */
 def initSubscriptions() {
     // subscribe to the Smart Home Manager api for alarm status events
-    if (debug) log.debug("initialize: subscribe to SHM alarmSystemStatus API messages")
+    if (debug) log.debug("initSubscriptions: Subscribe to handlers")
     subscribe(location, "alarmSystemStatus", shmAlarmHandler)
 
-    /* subscribe to local LAN messages to this HUB on TCP port 39500 and UPNP UDP port 1900 */
-    if (debug) log.debug("initialize: subscribe to locations local LAN messages")
-    subscribe(location, null, locationHandler, [filterEvents: false])
-
     // subscribe to add zone handler
-    subscribe(location, "addZone", addZone, [filterEvents: false])   
+    subscribe(app, addZone)
+
+    /* subscribe to local LAN messages to this HUB on TCP port 39500 and UPNP UDP port 1900 */
+    subscribe(location, null, locationHandler, [filterEvents: false])
 }
 
 /**
@@ -1078,16 +1081,12 @@ def addExistingDevices() {
             }
 			
 			
-			def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
+			def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Guest Room Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
             // Add virtual zone contact sensors if they do not exist.
+            // asynchronous to avoid timeout. Apps can only run for 20 seconds or it will be killed.
             for (def i = 0; i < sensorMap.size(); i++)
             {
-                def newSwitch = state.devices.find { k, v -> k == "${state.ip}:${state.port}:switch${i+1}" }
-                if (!newSwitch)
-                {
-                    // send ourself a create device event
-                    sendLocationEvent(name: "addZone", value: "${i+1}", data: "${state.ip}:${state.port}:switch${i+1}")
-                }
+                sendEvent(name: "addZone", value: "${i+1}", data: "${state.ip}:${state.port}:switch${i+1}")
             }
 
             // Add virtual Smoke Alarm sensors if it does not exist.
