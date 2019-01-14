@@ -23,7 +23,7 @@ import groovy.transform.Field
 @Field debug = false
 
 def getSensorMap() {
-    return ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
+    return ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Guest Room Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
 }
 def sensorMap = getSensorMap();	
 									
@@ -336,7 +336,7 @@ def updated() {
     state.aux_started = null;
 
 /*** Sensors ***/
-			def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
+			def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Guest Room Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
 			def sensorKeys = sensorMap.keySet() as String[]; 
     for (def i = 1; i <= sensorMap.size(); i++)
         sendEvent(name: "zoneStatus${i}", value: "", displayed: false)
@@ -916,7 +916,7 @@ private def build_zone_events(data) {
 
     // Fill zone tiles
 /*** Sensors ***/
-def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
+def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Guest Room Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
 def sensorKeys = sensorMap.keySet() as String[]; 
     for (def i = 1; i <= sensorMap.size(); i++) {
 	def currentSensorKey = sensorKeys[i-1];	
@@ -939,21 +939,19 @@ def sensorKeys = sensorMap.keySet() as String[];
 private def update_zone_switches(zone, faulted) {
     def events = []
 /*** Sensors ***/
-def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Bedroom 2 Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
+def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Guest Room Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
 def sensorKeys = sensorMap.keySet() as String[]; 
     // Iterate through the zone tracker settings.  If the zone number matches,
     // trigger an event for the service manager to use to flip the virtual
     // switches.
     for (def i = 1; i <= sensorMap.size(); i++) {
-def currentSensorKey = sensorKeys[i-1];	
+    def currentSensorKey = sensorKeys[i-1];	
 	def currentSensorValue = sensorMap[currentSensorKey];	
         if (zone == settings."zonetracker${i}zone") {
-            if (faulted) {
+            if (faulted)
                 events << createEvent(name: "zone-on", value: i, isStateChange: true, displayed: false)
-               }
-            else {
+            else
                 events << createEvent(name: "zone-off", value: i, isStateChange: true, displayed: false)
-                }
         }
     }
 

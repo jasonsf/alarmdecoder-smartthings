@@ -834,8 +834,8 @@ def addZone(evt) {
             sensorValue = "closed"
         }
     
-    // Set default contact state.
-    zone_switch.sendEvent(name: "contact", value: sensorValue, isStateChange: true, displayed: false)
+        // Set default contact state.
+        zone_switch.sendEvent(name: "contact", value: sensorValue, isStateChange: true, displayed: false)
     } catch (e) { 
         log.error "There was an error (${e}) when trying to addZone ${i}"
     }
