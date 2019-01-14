@@ -824,9 +824,11 @@ def addZone(evt) {
 	def sensorKeys = sensorMap.keySet() as String[]; 
     
     def i = evt.value
+    log.info("App Event: addZone ${i}")
 	def currentSensorKey = sensorKeys[i];	
-	def currentSensorValue = sensorMap[currentSensorKey];
     log.info("App Event: addZone ${i}: ${sensorKeys[i]} ${sensorMap[currentSensorKey]}")
+	def currentSensorValue = sensorMap[currentSensorKey];
+    log.info("App Event: addZone ${i}: ${currentSensorValue}")
     try {        
         def zone_switch = addChildDevice("alarmdecoder", "AlarmDecoder virtual contact sensor", "${evt.data}", state.hub, [name: "${evt.data}", label: "${currentSensorKey}: ${currentSensorValue}", completedSetup: true])
         def sensorValue = "open"
