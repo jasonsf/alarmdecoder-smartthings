@@ -823,7 +823,7 @@ def addZone(evt) {
 	def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Guest Room Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
 	def sensorKeys = sensorMap.keySet() as String[]; 
     
-    def i = evt.value
+    def i = evt.value.toInteger();
     log.info("App Event: addZone ${i}")
 	def currentSensorKey = sensorKeys[i];	
     log.info("App Event: addZone ${i}: ${sensorKeys[i]} ${sensorMap[currentSensorKey]}")
