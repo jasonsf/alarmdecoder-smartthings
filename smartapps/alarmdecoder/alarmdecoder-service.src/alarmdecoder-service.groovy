@@ -839,7 +839,7 @@ def addZone(evt) {
     } catch (e) { 
         log.error "There was an error (${e}) when trying to addZone ${i}"
     }
-
+}
 
 
 /**
