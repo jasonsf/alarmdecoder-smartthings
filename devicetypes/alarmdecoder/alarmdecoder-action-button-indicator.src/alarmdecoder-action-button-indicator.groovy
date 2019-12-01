@@ -1,4 +1,4 @@
- /**
+/**
  *  Virtual Momentary Switch to trigger actions with indicator in the AlarmDecoder service
  *
  *  Copyright 2016-2018 Nu Tech Software Solutions, Inc.
@@ -13,22 +13,23 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  */
- 
- /*
+
+/*
  * global support
  */
 import groovy.transform.Field
 @Field APPNAMESPACE = "alarmdecoder"
 
 metadata {
-        definition (name: "AlarmDecoder action button indicator", namespace: APPNAMESPACE, author: "Nu Tech Software Solutions, Inc.") {
-		capability "Switch"
+    definition (name: "AlarmDecoder action button indicator", namespace: APPNAMESPACE, author: "Nu Tech Software Solutions, Inc.") {
+        capability "Switch"
         capability "Momentary"
         command "push"
         command "on"
         command "off"
     }
 
+    // tile definitions
     tiles {
         standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true) {
             state "off", label: 'Push', action: "momentary.push", backgroundColor: "#ffffff"
@@ -37,6 +38,12 @@ metadata {
         main "switch"
         details "switch"
     }
+
+    // preferences
+    preferences {
+        input name: "invert", type: "bool", title: "Invert", description: "Invert signal ON is OFF/OPEN is CLOSE/DETECTED is CLEAR", required: false
+    }
+
 }
 
 // parse events into attributes
@@ -56,4 +63,12 @@ def on() {
 
 def off() {
 	push()
+}
+
+def installed() {
+    updateDataValue("invert", invert.toString())
+}
+
+def updated() {
+    updateDataValue("invert", invert.toString())
 }
