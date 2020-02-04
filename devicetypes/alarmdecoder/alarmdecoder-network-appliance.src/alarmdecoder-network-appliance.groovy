@@ -68,24 +68,24 @@ preferences {
       required: true)
    }
   
-    section() {
-        input("zonetracker1zone", "number", title: "10: " + sensorMap['10'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker2zone", "number", title: "11: " + sensorMap['11'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker3zone", "number", title: "12: " + sensorMap['12'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker4zone", "number", title: "13: " + sensorMap['13'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker5zone", "number", title: "14: " + sensorMap['14'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker6zone", "number", title: "15: " + sensorMap['15'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker7zone", "number", title: "16: " + sensorMap['16'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker8zone", "number", title: "17: " + sensorMap['17'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker9zone", "number", title: "18: " + sensorMap['18'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker10zone", "number", title: "19: " + sensorMap['19'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker11zone", "number", title: "20: " + sensorMap['20'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker12zone", "number", title: "21: " + sensorMap['21'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker13zone", "number", title: "22: " + sensorMap['22'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker14zone", "number", title: "23: " + sensorMap['23'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker15zone", "number", title: "24: " + sensorMap['24'], description: "Zone number to associate with this contact sensor.")
-        input("zonetracker16zone", "number", title: "25: " + sensorMap['25'], description: "Zone number to associate with this contact sensor.")
-    }
+    // section() {
+    //     input("zonetracker1zone", "number", title: "10: " + sensorMap['10'], description: "Zone number to associate with this contact sensor.")
+    //     input("zonetracker2zone", "number", title: "11: " + sensorMap['11'], description: "Zone number to associate with this contact sensor.")
+    //     input("zonetracker3zone", "number", title: "12: " + sensorMap['12'], description: "Zone number to associate with this contact sensor.")
+    //     input("zonetracker4zone", "number", title: "13: " + sensorMap['13'], description: "Zone number to associate with this contact sensor.")
+    //     input("zonetracker5zone", "number", title: "14: " + sensorMap['14'], description: "Zone number to associate with this contact sensor.")
+    //     input("zonetracker6zone", "number", title: "15: " + sensorMap['15'], description: "Zone number to associate with this contact sensor.")
+    //     input("zonetracker7zone", "number", title: "16: " + sensorMap['16'], description: "Zone number to associate with this contact sensor.")
+    //     input("zonetracker8zone", "number", title: "17: " + sensorMap['17'], description: "Zone number to associate with this contact sensor.")
+    //     input("zonetracker9zone", "number", title: "18: " + sensorMap['18'], description: "Zone number to associate with this contact sensor.")
+    //     input("zonetracker10zone", "number", title: "19: " + sensorMap['19'], description: "Zone number to associate with this contact sensor.")
+    //     input("zonetracker11zone", "number", title: "20: " + sensorMap['20'], description: "Zone number to associate with this contact sensor.")
+    //     input("zonetracker12zone", "number", title: "21: " + sensorMap['21'], description: "Zone number to associate with this contact sensor.")
+    //     input("zonetracker13zone", "number", title: "22: " + sensorMap['22'], description: "Zone number to associate with this contact sensor.")
+    //     input("zonetracker14zone", "number", title: "23: " + sensorMap['23'], description: "Zone number to associate with this contact sensor.")
+    //     input("zonetracker15zone", "number", title: "24: " + sensorMap['24'], description: "Zone number to associate with this contact sensor.")
+    //     input("zonetracker16zone", "number", title: "25: " + sensorMap['25'], description: "Zone number to associate with this contact sensor.")
+    // }
   }
 /**
  * metadata
