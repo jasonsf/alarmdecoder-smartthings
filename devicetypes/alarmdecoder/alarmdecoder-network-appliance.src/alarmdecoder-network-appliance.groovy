@@ -86,7 +86,6 @@ preferences {
     //     input("zonetracker15zone", "number", title: "24: " + sensorMap['24'], description: "Zone number to associate with this contact sensor.")
     //     input("zonetracker16zone", "number", title: "25: " + sensorMap['25'], description: "Zone number to associate with this contact sensor.")
     // }
-}
 
 /**
  * metadata
