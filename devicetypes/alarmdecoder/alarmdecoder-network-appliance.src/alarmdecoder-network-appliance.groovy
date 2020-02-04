@@ -67,7 +67,7 @@ preferences {
       defaultValue: "ADEMCO",
       required: true)
    }
-  }
+  
     section() {
         input("zonetracker1zone", "number", title: "10: " + sensorMap['10'], description: "Zone number to associate with this contact sensor.")
         input("zonetracker2zone", "number", title: "11: " + sensorMap['11'], description: "Zone number to associate with this contact sensor.")
@@ -86,7 +86,7 @@ preferences {
         input("zonetracker15zone", "number", title: "24: " + sensorMap['24'], description: "Zone number to associate with this contact sensor.")
         input("zonetracker16zone", "number", title: "25: " + sensorMap['25'], description: "Zone number to associate with this contact sensor.")
     }
-
+  }
 /**
  * metadata
  */
