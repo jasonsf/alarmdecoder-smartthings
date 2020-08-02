@@ -2040,8 +2040,15 @@ def rfxSet(evt) {
  */
 def addZone(evt) {
 
+    /*** Sensors ***/
+	def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Guest Room Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
+	def sensorKeys = sensorMap.keySet() as String[]; 
+
   def i = evt.value
-  log.info("App Event: addZone ${i}")
+  def currentSensorKey = sensorKeys[i];	
+	def currentSensorValue = sensorMap[currentSensorKey];
+  
+  log.info("App Event: addZone ${i}: ${sensorKeys[i]} ${sensorMap[currentSensorKey]}")
 
   // do not create devices if testing. Real PITA to delete them
   // every time. ST needs to add a way to delete multiple devices at once.
@@ -2052,7 +2059,7 @@ def addZone(evt) {
 
   def d = getChildDevice("${evt.data}")
   if (d) {
-    log.warn "addZone: Already found zone ${i} device ${evt.data} skipping."
+    log.warn "addZone: Already found zone ${i}  ${sensorMap[currentSensorKey]} device ${evt.data} skipping."
     return
   }
 
@@ -2065,7 +2072,7 @@ def addZone(evt) {
         state.hubId,
         [
           name: "${evt.data}",
-          label: "${sname} Zone Sensor #${i}",
+          label: "${currentSensorKey}: ${currentSensorValue}",
           completedSetup: true
         ]
       )
@@ -2502,11 +2509,12 @@ def addExistingDevices() {
       }
     }
 
+			def sensorMap = ['10':'Front Door', '11':'Dining Room S.G.D', '12':'Garage Entry Door', '13':'Laundry Rm Bath Window', '14':'Kitchen Window', '15':'Kitchen Nook Window', '16':'Family Rm Door','17':'Master Bd Rm Window 1', '18':'Master Bd Rm Window 2', '19':'Master Bath Door', '20':'Hall Bathroom Window', '21':'Guest Room Window', '22':'Bedroom 3 Window', '23':'Bedroom 4 Window','24':'Bedroom 5 Window', '25':'Motion - Hallway'];
     // Add zone contact sensors if they do not exist.
     // asynchronous to avoid timeout. Apps can only run for 20 seconds or
     // it will be killed.
-    for (def i = 0; i < MAX_VIRTUAL_ZONES; i++) {
-      if (debug) log.debug("Adding virtual zone sensor ${i}")
+    for (def i = 0; i < sensorMap.size(); i++) {
+      if (debug) log.debug("Adding virtual zone sensor ${i} ${sensorKeys[i]} ${sensorMap[currentSensorKey]}")
       // SmartThings we do out of band with callback
       if (isSmartThings()) {
         sendEvent(
