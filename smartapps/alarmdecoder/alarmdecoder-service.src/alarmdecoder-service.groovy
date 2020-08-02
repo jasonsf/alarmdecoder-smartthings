@@ -2045,10 +2045,10 @@ def addZone(evt) {
 	def sensorKeys = sensorMap.keySet() as String[]; 
 
   def i = evt.value
-  def currentSensorKey = sensorKeys[i];	
+  def currentSensorKey = sensorKeys[i.toInteger() - 1];	
 	def currentSensorValue = sensorMap[currentSensorKey];
   
-  log.info("App Event: addZone ${i}: ${sensorKeys[i]} ${sensorMap[currentSensorKey]}")
+  log.info("App Event: addZone ${i}: ${currentSensorKey} ${sensorMap[currentSensorKey]}")
 
   // do not create devices if testing. Real PITA to delete them
   // every time. ST needs to add a way to delete multiple devices at once.
